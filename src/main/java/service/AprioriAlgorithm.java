@@ -60,8 +60,11 @@ public class AprioriAlgorithm {
         Set<Integer> availableItems = supportSet.stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
-        int countOfItemsInSet = supportSet.iterator().next().size() + 1;
+        if (availableItems.size() == 0) {
+            return Collections.emptyList();
+        }
 
+        int countOfItemsInSet = supportSet.iterator().next().size() + 1;
         return Generator.combination(availableItems)
                 .simple(countOfItemsInSet)
                 .stream()

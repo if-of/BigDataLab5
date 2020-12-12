@@ -29,4 +29,9 @@ public class Chromosome {
         chromosome.setFitnessFunction(fitnessFunction);
         return chromosome;
     }
+
+    @Override
+    public String toString() {
+        return String.format("fitnes: %4d  products: %s", fitnessFunction, genes.toString());
+    }
 }

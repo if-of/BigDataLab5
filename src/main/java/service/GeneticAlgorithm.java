@@ -56,7 +56,9 @@ public class GeneticAlgorithm {
         }
         mutation(population);
 
-        return population;
+        return population.stream()
+                .sorted(Comparator.comparingInt(Chromosome::getFitnessFunction).reversed())
+                .collect(Collectors.toList());
     }
 
     private static List<Integer> calculateAvailableGenes(List<List<Integer>> dataTable) {
@@ -130,6 +132,9 @@ public class GeneticAlgorithm {
         firstUniqueGenes.removeAll(secondChromosome.getGenes());
         List<Integer> secondUniqueGenes = new ArrayList<>(secondChromosome.getGenes());
         secondUniqueGenes.removeAll(firstChromosome.getGenes());
+        if (firstUniqueGenes.size() == 0) {
+            return;
+        }
 
         int countOfSwaps = random.nextInt(firstUniqueGenes.size());
         for (int i = 0; i < countOfSwaps; i++) {
