@@ -10,41 +10,47 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Apriori {
+public class AprioriAlgorithm {
     private final int minSupport;
-    private final int finalSubsetSize;
+    private final int finalCombinationSize;
+    private final List<List<Integer>> unsupportedItemSets;
+    private final List<List<Integer>> dataTable;
 
-    public Apriori(int minSupport, int finalSubsetSize) {
+    public AprioriAlgorithm(int minSupport, int finalCombinationSize, List<List<Integer>> dataTable) {
         this.minSupport = minSupport;
-        this.finalSubsetSize = finalSubsetSize;
+        this.finalCombinationSize = finalCombinationSize;
+        this.dataTable = dataTable;
+        unsupportedItemSets = new ArrayList<>();
     }
 
-    public List<List<Integer>> calculate(List<List<Integer>> dataTable) {
+    public List<List<Integer>> calculate() {
         List<List<Integer>> itemSets = dataTable.stream()
                 .flatMap(Collection::stream)
                 .distinct()
                 .map(Collections::singletonList)
                 .collect(Collectors.toList());
-        itemSets = filterItemSetsBySupport(itemSets, dataTable);
+        itemSets = filterItemSetsBySupport(itemSets);
 
-        for (int i = 1; i < finalSubsetSize; i++) {
+        for (int i = 1; i < finalCombinationSize; i++) {
             itemSets = recalculateItemSets(itemSets);
-            itemSets = filterItemSetsBySupport(itemSets, dataTable);
+            itemSets = filterItemSetsBySupport(itemSets);
         }
         return itemSets;
     }
 
-    private List<List<Integer>> filterItemSetsBySupport(List<List<Integer>> itemSets, List<List<Integer>> dataTable) {
+    private List<List<Integer>> filterItemSetsBySupport(List<List<Integer>> itemsList) {
         List<List<Integer>> supportSet = new ArrayList<>();
-        for (List<Integer> itemSet : itemSets) {
+        for (List<Integer> itemList : itemsList) {
             int support = 0;
             for (List<Integer> row : dataTable) {
-                if (row.containsAll(itemSet)) {
+                if (row.containsAll(itemList)) {
                     support++;
                 }
             }
             if (support >= minSupport) {
-                supportSet.add(itemSet);
+                supportSet.add(itemList);
+            } else {
+                unsupportedItemSets.add(itemList);
             }
         }
         return supportSet;
@@ -59,6 +65,16 @@ public class Apriori {
         return Generator.combination(availableItems)
                 .simple(countOfItemsInSet)
                 .stream()
+                .filter(this::isSupportedItemList)
                 .collect(Collectors.toList());
+    }
+
+    private boolean isSupportedItemList(List<Integer> itemList) {
+        for (List<Integer> unsupportedItem : unsupportedItemSets) {
+            if (itemList.containsAll(unsupportedItem)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
